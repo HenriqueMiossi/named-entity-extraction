@@ -20,7 +20,9 @@ class RDF2Vec:
         )
 
     def get_embeddings(self, uris: list[str]) -> np.ndarray:
-        if len(uris) == 0: return np.array()
+        if len(uris) == 0: return np.zeros(1)
+
+        uris = list(set(uris))
 
         transformer = RDF2VecTransformer(
             Word2Vec(epochs=10),
@@ -29,7 +31,5 @@ class RDF2Vec:
         )
 
         embeddings, literals = transformer.fit_transform(self.kg, uris)
-
-        print(embeddings, literals)
         
-        return np.array(np.array(embeddings))
+        return np.array(embeddings)

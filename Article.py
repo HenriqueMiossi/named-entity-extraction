@@ -16,20 +16,18 @@ class Article:
 
     def __init__(self, path: str) -> None:
         with open(file=path, mode="r", encoding="windows-1252") as file:
+            self.filename = file.name
             self.content = file.read()
 
     def apply_ner(self) -> Self:
         self.entities = self.__nlp(self.content).ents
         return self
 
-    def get_dbpedia_uri(self, method: Method) -> Self:
+    def get_dbpedia_uris(self, method: Method) -> Self:
         dbpedia = DbpediaInterface()
 
-        # if method == Method.WORD2VEC:
-        #     self.content
-
         if method == Method.RDF2VEC:
-            uri_list = []
+            self.__uri_list = []
 
             for entity in self.entities:
                 entity_type = EntityType[entity.label_]
@@ -47,19 +45,25 @@ class Article:
                         self.__calculate_similarity(doc, candidate)
                         for candidate in uris
                     ]
-                    uri_list.append(
+                    self.__uri_list.append(
                         max(candidates_similarity, key=lambda d: d["similarity"])
                     )
+        return self
 
-            # Create embedding list from uri_list with pyRDF2Vec
-            # Create single embedding for the article with an embedding aggregation technique
-            uri_string_list = [
-                item["uri"][list(item["uri"].keys())[0]]["value"]
-                for item in uri_list
-            ]
+    def get_uri_embeddings(self) -> Self:
+        # Create embedding list from uri_list with pyRDF2Vec
+        uri_string_list = [
+            item["uri"][list(item["uri"].keys())[0]]["value"] for item in self.__uri_list
+        ]
 
-            embedder = RDF2Vec()
-            embeddings = embedder.get_embeddings(uri_string_list)
+        embedder = RDF2Vec()
+        self.embeddings = embedder.get_embeddings(uri_string_list)
+        return self
+
+    def get_article_embedding(self) -> Self:
+        # Create single embedding for the article with an embedding aggregation technique
+        print()
+        return self
 
     def __calculate_similarity(
         self, original_document: spacy.tokens.Doc, uri: dict

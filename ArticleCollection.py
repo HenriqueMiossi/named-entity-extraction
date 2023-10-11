@@ -11,6 +11,10 @@ class ArticleCollection:
             join(path, f) for f in listdir(path) if isfile(join(path, f))
         ]
         self.items = [
-            Article(article).apply_ner().get_dbpedia_uri(method=Method.RDF2VEC)
+            Article(article)
+            .apply_ner()
+            .get_dbpedia_uris(method=Method.RDF2VEC)
+            .get_uri_embeddings()
+            .get_article_embedding()
             for article in file_paths_from_directory
         ]
