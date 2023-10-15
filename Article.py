@@ -61,8 +61,22 @@ class Article:
         return self
 
     def get_article_embedding(self) -> Self:
-        # Create single embedding for the article with an embedding aggregation technique
-        print()
+        # Check for available embeddings
+        if not hasattr(self, 'embeddings') or not self.embeddings:
+            print("Erro: embeddings não disponíveis.")
+            return self
+        
+        # If there are no entities, return a vector of zeros as article embedding
+        if len(self.embeddings) == 0:
+            self.article_embedding = np.zeros(self.embeddings.shape[1])
+            return self
+
+        # Aggregate the embeddings of article entities by calculating the average
+        aggregated_embedding = np.mean(self.embeddings, axis=0)
+
+        # Store the aggregate article embedding
+        self.article_embedding = aggregated_embedding
+
         return self
 
     def __calculate_similarity(
