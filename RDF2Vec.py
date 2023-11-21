@@ -3,7 +3,6 @@ from pyrdf2vec.graphs import KG
 from pyrdf2vec.walkers import RandomWalker
 from pyrdf2vec.embedders import Word2Vec
 import numpy as np
-from rdflib import URIRef
 
 
 class RDF2Vec:

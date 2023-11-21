@@ -1,9 +1,6 @@
 from typing_extensions import Self
-from contextlib import closing
-from multiprocessing import Pool
 import spacy
-from rdflib import Graph, URIRef, Namespace
-from rdflib.namespace import RDF
+import numpy as np
 
 from DbpediaInterface import DbpediaInterface
 from EntityType import EntityType
@@ -61,8 +58,17 @@ class Article:
         return self
 
     def get_article_embedding(self) -> Self:
-        # Create single embedding for the article with an embedding aggregation technique
-        print()
+        # If there are no entities, return a vector of zeros as article embedding
+        if len(self.embeddings) == 0:
+            self.article_embedding = np.zeros(self.embeddings.shape[1])
+            return self
+
+        # Aggregate the embeddings of article entities by calculating the average
+        aggregated_embedding = np.mean(self.embeddings, axis=0)
+
+        # Store the aggregate article embedding
+        self.article_embedding = aggregated_embedding
+
         return self
 
     def __calculate_similarity(
