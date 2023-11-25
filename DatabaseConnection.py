@@ -21,9 +21,10 @@ class DatabaseConnection:
         return self
     
     def get_similar_article(self, embedding: np.ndarray):
-        self.__cursor.execute(f"SELECT * FROM vector_db.articles ORDER BY embedding <=> %s LIMIT 5;", (embedding,))
-        result = self.__cursor.fetchall()
-        return result
+        self.__cursor.execute(f"SELECT *, embedding <-> %s AS distance FROM vector_db.articles ORDER BY distance LIMIT 5;", (embedding,))
+        results = self.__cursor.fetchall()
+        for result in results:
+            print(f"id: {result[0]}, article: {result[1]}, distance: {result[3]}")
         
     def finalize(self):
         self.__cursor.close()

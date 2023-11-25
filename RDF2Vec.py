@@ -19,16 +19,20 @@ class RDF2Vec:
         )
 
     def get_embeddings(self, uris: list[str]) -> np.ndarray:
-        if len(uris) == 0: return np.zeros(1)
+        if len(uris) == 0: return np.zeros(100)
 
         uris = list(set(uris))
 
         transformer = RDF2VecTransformer(
             Word2Vec(epochs=10),
             walkers=[RandomWalker(4, 10, with_reverse=False, n_jobs=4)],
-            verbose=1
+            verbose=1,
         )
 
-        embeddings, literals = transformer.fit_transform(self.kg, uris)
-        
+        try:
+            embeddings, _ = transformer.fit_transform(self.kg, uris)
+        except Exception as e:
+            print(f'Error: {e}')
+            raise e
+
         return np.array(embeddings)

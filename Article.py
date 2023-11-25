@@ -28,15 +28,19 @@ class Article:
 
             for entity in self.entities:
                 entity_type = EntityType[entity.label_]
+                if (entity_type.name == 'MISC'):
+                    continue
+
                 uris = dbpedia.get_possible_dbpedia_uris(entity.text, entity_type)
 
-                # Disambiguate uris
                 if uris == None or len(uris) == 0:
                     continue
                 elif len(uris) == 1:
-                    uri = uris[0]
+                    doc = self.__nlp(self.content)
+                    item = self.__calculate_similarity(doc, uris[0])
+                    self.__uri_list.append(item)
                 else:
-                    # Disambiguate uris
+                    # Disambiguate URIs
                     doc = self.__nlp(self.content)
                     candidates_similarity = [
                         self.__calculate_similarity(doc, candidate)
@@ -49,9 +53,11 @@ class Article:
 
     def get_uri_embeddings(self) -> Self:
         # Create embedding list from uri_list with pyRDF2Vec
-        uri_string_list = [
-            item["uri"][list(item["uri"].keys())[0]]["value"] for item in self.__uri_list
-        ]
+        if (len(self.__uri_list) == 0):
+            raise Exception('No URIs were found at DBpedia')
+        
+        for item in self.__uri_list:
+            uri_string_list = [item["uri"][list(item["uri"].keys())[0]]["value"]]
 
         embedder = RDF2Vec()
         self.embeddings = embedder.get_embeddings(uri_string_list)
